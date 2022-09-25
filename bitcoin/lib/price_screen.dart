@@ -9,14 +9,28 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  CoinData coinData = CoinData();
-  double price = 0;
-  void getPrice() {
-    setState(() async {
-      var priceData = await coinData.getCoinData(selectedCurrency);
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
-      price = priceData['rate'];
-    });
+  CoinData coinData = CoinData();
+  double bitPrice = 0;
+  double ethPrice = 0;
+  double ltcPrice = 0;
+  void getPrices() async {
+    for (int i = 0; i < cryptoList.length; i++) {
+      var priceData =
+          await coinData.getCoinData(selectedCurrency, cryptoList[i]);
+      if (cryptoList[i] == 'BTC')
+        bitPrice = priceData['rate'];
+      else if (cryptoList[i] == 'ETH')
+        ethPrice = priceData['rate'];
+      else
+        ltcPrice = priceData['rate'];
+    }
+    setState(() {});
   }
 
   DropdownButton<String> androidDropDownButton() {
@@ -32,7 +46,7 @@ class _PriceScreenState extends State<PriceScreen> {
         onChanged: (value) {
           setState(() {
             selectedCurrency = value!;
-            getPrice();
+            getPrices();
           });
         });
   }
@@ -59,6 +73,7 @@ class _PriceScreenState extends State<PriceScreen> {
     }
   }
 
+  late Widget cardFinal;
   String selectedCurrency = 'USD';
   @override
   Widget build(BuildContext context) {
@@ -70,27 +85,20 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = ${price.toStringAsFixed(3)} $selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+          cardWidget(
+            cryptoCurrency: 'BTC',
+            price: bitPrice,
+            selectedCurrency: selectedCurrency,
+          ),
+          cardWidget(
+            cryptoCurrency: 'ETH',
+            price: ethPrice,
+            selectedCurrency: selectedCurrency,
+          ),
+          cardWidget(
+            cryptoCurrency: 'LTC',
+            price: ltcPrice,
+            selectedCurrency: selectedCurrency,
           ),
           Container(
               height: 150.0,
@@ -104,18 +112,45 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 }
 
+class cardWidget extends StatefulWidget {
+  const cardWidget(
+      {Key? key,
+      required this.price,
+      required this.selectedCurrency,
+      required this.cryptoCurrency})
+      : super(key: key);
 
-//  DropdownButton<String>(
-//                 value: selectedCurrency,
-//                 items: [
-//                   for (int i = 0; i < currenciesList.length; i++)
-//                     DropdownMenuItem(
-//                       value: currenciesList[i],
-//                       child: Text(currenciesList[i]),
-//                     )
-//                 ],
-//                 onChanged: (value) {
-//                   setState(() {
-//                     selectedCurrency = value!;
-//                   });
-//                 }),
+  final double price;
+  final String selectedCurrency;
+  final String cryptoCurrency;
+
+  @override
+  State<cardWidget> createState() => _cardWidgetState();
+}
+
+class _cardWidgetState extends State<cardWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+      child: Card(
+        color: Colors.lightBlueAccent,
+        elevation: 5.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+          child: Text(
+            '1 ${widget.cryptoCurrency} = ${widget.price.toStringAsFixed(3)} ${widget.selectedCurrency}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

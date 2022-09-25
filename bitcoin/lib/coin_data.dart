@@ -38,9 +38,9 @@ class CoinData {
 //  // late String url =
 //       'https://rest.coinapi.io/v1/exchangerate/BTC/$currency?apikey=02BA1CA9-5836-482F-B08A-55F7655DE090';
 
-  Future<dynamic> getCoinData(String currency) async {
+  Future<dynamic> getCoinData(String currency, String crypto) async {
     Response jsonData = await get(Uri.parse(
-        'https://rest.coinapi.io/v1/exchangerate/BTC/$currency?apikey=02BA1CA9-5836-482F-B08A-55F7655DE090'));
+        'https://rest.coinapi.io/v1/exchangerate/$crypto/$currency?apikey=02BA1CA9-5836-482F-B08A-55F7655DE090'));
     String data = jsonData.body;
     var decodedData = jsonDecode(data);
     return decodedData;
